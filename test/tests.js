@@ -70,20 +70,20 @@ exports.Allows = function () {
     })
   })
 
-  describe('Add user roles', function () {
+  describe.only('Add user roles', function () {
     it('joed => guest, jsmith => member, harry => admin, test@test.com => member', function (done) {
       var acl = new Acl(this.backend)
 
-      acl.addUserRoles('joed', 'guest', function (err) {
+      acl.addUserRoles('joed', 'guest', {}, function (err) {
         assert(!err)
 
-        acl.addUserRoles('jsmith', 'member', function (err) {
+        acl.addUserRoles('jsmith', 'member', {}, function (err) {
           assert(!err)
 
-          acl.addUserRoles('harry', 'admin', function (err) {
+          acl.addUserRoles('harry', 'admin', {}, function (err) {
             assert(!err)
 
-            acl.addUserRoles('test@test.com', 'member', function (err) {
+            acl.addUserRoles('test@test.com', 'member', {}, function (err) {
               assert(!err);
               done()
             });
@@ -95,17 +95,32 @@ exports.Allows = function () {
     it('0 => guest, 1 => member, 2 => admin', function (done) {
       var acl = new Acl(this.backend)
 
-      acl.addUserRoles(0, 'guest', function (err) {
+      acl.addUserRoles(0, 'guest', {}, function (err) {
         assert(!err)
 
-        acl.addUserRoles(1, 'member', function (err) {
+        acl.addUserRoles(1, 'member', {}, function (err) {
           assert(!err)
 
-          acl.addUserRoles(2, 'admin', function (err) {
+          acl.addUserRoles(2, 'admin', {}, function (err) {
             assert(!err);
             done()
           })
         })
+      })
+    })
+
+    it('aaaa => member + expiresIn', function (done) {
+      var acl = new Acl(this.backend)
+
+      acl.addUserRoles('aaaa', 'member', {expiresIn: 1}, function (err) {
+        assert(!err)
+        setTimeout(function () {
+          acl.userRoles('aaaa', function (err, roles) {
+            console.log(roles);
+            assert.equal(roles.length, 0);
+            done();
+          });
+        }, 1500);
       })
     })
   })
@@ -113,7 +128,7 @@ exports.Allows = function () {
   describe('read User Roles', function() {
     it('run userRoles function', function(done) {
       var acl = new Acl(this.backend)
-      acl.addUserRoles('harry', 'admin', function (err) {
+      acl.addUserRoles('harry', 'admin', {}, function (err) {
         if (err) return done(err);
 
         acl.userRoles('harry', function(err, roles) {
@@ -139,7 +154,7 @@ exports.Allows = function () {
   describe('read Role Users', function() {
     it('run roleUsers function', function(done) {
       var acl = new Acl(this.backend)
-      acl.addUserRoles('harry', 'admin', function (err) {
+      acl.addUserRoles('harry', 'admin', {}, function (err) {
         if (err) return done(err);
 
         acl.roleUsers('admin', function(err, users) {
@@ -197,7 +212,7 @@ exports.Allows = function () {
     it('add them', function (done) {
       var acl = new Acl(this.backend)
 
-      acl.addUserRoles('james', 'baz', function (err) {
+      acl.addUserRoles('james', 'baz', {}, function (err) {
         assert(!err)
         done()
       })
@@ -205,7 +220,7 @@ exports.Allows = function () {
     it('add them (numeric userId)', function (done) {
       var acl = new Acl(this.backend)
 
-      acl.addUserRoles(3, 'baz', function (err) {
+      acl.addUserRoles(3, 'baz', {}, function (err) {
         assert(!err)
         done()
       })
@@ -249,14 +264,14 @@ exports.Allows = function () {
   describe('Add fumanchu role to suzanne', function () {
     it('do it', function (done) {
       var acl = new Acl(this.backend)
-      acl.addUserRoles('suzanne', 'fumanchu', function (err) {
+      acl.addUserRoles('suzanne', 'fumanchu', {}, function (err) {
         assert(!err)
         done()
       })
     })
     it('do it (numeric userId)', function (done) {
       var acl = new Acl(this.backend)
-      acl.addUserRoles(4, 'fumanchu', function (err) {
+      acl.addUserRoles(4, 'fumanchu', {}, function (err) {
         assert(!err)
         done()
       })
@@ -1088,7 +1103,7 @@ exports.i55PermissionRemoval = function () {
     it('Add roles/resources/permissions', function () {
       var acl = new Acl(this.backend)
 
-      return acl.addUserRoles('jannette', 'member').then(function(){
+      return acl.addUserRoles('jannette', 'member', {}).then(function(){
         return acl.allow('member', 'blogs', ['view', 'update']);
       }).then(function(){
         return acl.isAllowed('jannette', 'blogs', 'view', function(err, allowed){
@@ -1129,7 +1144,7 @@ exports.i32RoleRemoval = function () {
     it('Add user roles and parent roles', function (done) {
       var acl = new Acl(this.backend)
 
-        acl.addUserRoles('user1', 'role1', function (err) {
+        acl.addUserRoles('user1', 'role1', {}, function (err) {
           assert(!err)
 
           acl.addRoleParents('role1', 'parentRole1', function (err) {
@@ -1142,7 +1157,7 @@ exports.i32RoleRemoval = function () {
     it('Add user roles and parent roles', function (done) {
       var acl = new Acl(this.backend)
 
-        acl.addUserRoles(1, 'role1', function (err) {
+        acl.addUserRoles(1, 'role1', {}, function (err) {
           assert(!err)
 
           acl.addRoleParents('role1', 'parentRole1', function (err) {
